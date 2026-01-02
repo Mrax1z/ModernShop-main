@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Online</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Live Chat Styles */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chat-bubble {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .chat-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .chat-bubble i {
+            font-size: 24px;
+            color: white;
+        }
+        
+        .chat-bubble .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-container {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-container.active {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chat-header .status {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .close-chat {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+        
+        .close-chat:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .message.user {
+            background: #667eea;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.bot {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .message-time {
+            font-size: 11px;
+            margin-top: 5px;
+            opacity: 0.7;
+            text-align: right;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        .chat-input input:focus {
+            border-color: #667eea;
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+        
+        .quick-reply {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-reply:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 90%;
+                height: 70vh;
+                right: 5%;
+                bottom: 80px;
+            }
+            
+            .chat-bubble {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-loader">
+        <div class="spinner"></div>
+    </div>
+    
+   
+    
+    <!-- Tombol Akses Admin -->
+    <button class="admin-access-btn" id="adminAccessBtn" title="Akses Panel Admin">
+        <i class="fas fa-user-shield"></i>
+    </button>
+    
+    <!-- Live Chat Widget -->
+    <div class="chat-widget">
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <h3>
+                    <i class="fas fa-comments"></i>
+                    Live Chat
+                    <span class="status">• Online</span>
+                </h3>
+                <button class="close-chat" id="closeChat">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    Halo! 👋 Ada yang bisa saya bantu? Silakan tanyakan tentang produk atau layanan kami.
+                    <div class="message-time">Sekarang</div>
+                </div>
+            </div>
+            
+            <div class="quick-replies" id="quickReplies">
+                <div class="quick-reply" data-message="Ada produk apa saja?">Produk Terbaru</div>
+                <div class="quick-reply" data-message="Berapa harga termurah?">Harga Terbaik</div>
+                <div class="quick-reply" data-message="Bagaimana cara order?">Cara Order</div>
+                <div class="quick-reply" data-message="Ada diskon hari ini?">Promo Hari Ini</div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" 
+                       id="chatInput" 
+                       placeholder="Ketik pesan Anda..."
+                       autocomplete="off">
+                <button class="send-btn" id="sendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="chat-bubble" id="chatBubble">
+            <i class="fas fa-comment-dots"></i>
+            <div class="badge" id="chatBadge">1</div>
+        </div>
+    </div>
+    
+    <header class="header">
+        <div class="container">
+            <div class="header-wrapper">
+                <div class="logo-container">
+                    <h1 id="shop-name" class="animate__animated animate__fadeIn">Nama Toko</h1>
+                </div>
+                <div class="menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <nav class="navigation">
+                    <ul id="category-menu">
+                        <!-- Kategori akan ditambahkan secara dinamis di sini -->
+                    </ul>
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Cari produk...">
+                        <button id="search-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                </nav>
+            </div>
+            <div class="tagline-wrapper">
+                <p id="shop-tagline" class="animate__animated animate__fadeIn animate__delay-1s">Deskripsi singkat toko akan muncul di sini</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-banner">
+        <div class="hero-content container">
+            <div class="hero-text animate__animated animate__fadeInLeft">
+                <h2 id="hero-title">Belanja Produk Terbaik</h2>
+                <p id="hero-subtitle">Temukan koleksi produk berkualitas tinggi dengan harga terbaik</p>
+                <a href="#product-section" class="cta-button"><span>Lihat Produk</span></a>
+            </div>
+            <div class="hero-image animate__animated animate__fadeInRight">
+                <img id="shop-image" src="/api/placeholder/400/320" alt="Foto Toko">
+            </div>
+        </div>
+        <div class="wave-separator">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120">
+                <path fill="#ffffff" fill-opacity="1" d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
+            </svg>
+        </div>
+    </section>
+
+    <main class="container">
+        <section id="featured-categories" class="featured-categories">
+            <div class="section-header">
+                <h2>Kategori Populer</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div id="categories-container" class="categories-grid">
+                <!-- Kategori akan ditambahkan secara dinamis di sini -->
+            </div>
+        </section>
+
+        <section id="product-section" class="product-section">
+            <div class="section-header">
+                <h2 id="category-title">Semua Produk</h2>
+                <div class="section-divider"></div>
+            </div>
+            
+            <div id="product-filter" class="product-filter">
+                <button class="filter-btn active" data-category="all">Semua</button>
+                <!-- Filter kategori akan ditambahkan secara dinamis di sini -->
+            </div>
+            
+            <div id="products-container" class="products-grid">
+                <!-- Produk akan ditambahkan secara dinamis di sini -->
+            </div>
+        </section>
+
+        <section id="about-section" class="about-section">
+            <div class="section-header">
+                <h2>Tentang Kami</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="/api/placeholder/400/320" alt="Tentang Kami" id="about-image">
+                </div>
+                <div class="about-text">
+                    <p id="shop-about">Deskripsi toko akan muncul di sini</p>
+                    <div id="shop-contact">
+                        <h3>Hubungi Kami</h3>
+                        <div id="contact-details">
+                            <!-- Kontak akan ditambahkan secara dinamis di sini -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-content">
+                <div class="newsletter-text">
+                    <h2>Dapatkan Info & Promo Terbaru</h2>
+                    <p>Daftar untuk mendapatkan update tentang produk baru dan penawaran spesial</p>
+                </div>
+                <div class="newsletter-form">
+                    <input type="email" placeholder="Alamat Email Anda" id="newsletter-email">
+                    <button id="newsletter-submit">Berlangganan</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section brand">
+                    <h2 id="footer-shop-name">Nama Toko</h2>
+                    <p id="footer-tagline">Deskripsi singkat toko akan muncul di sini</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" id="instagram-link" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" id="facebook-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link" id="whatsapp-link" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Tautan Cepat</h3>
+                    <ul>
+                        <li><a href="#">Beranda</a></li>
+                        <li><a href="#product-section">Produk</a></li>
+                        <li><a href="#about-section">Tentang Kami</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section contact">
+                    <h3>Kontak</h3>
+                    <div id="footer-contact">
+                        <!-- Kontak akan ditambahkan secara dinamis di sini -->
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p id="shop-copyright">&copy; 2025 Nama Toko. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#" class="back-to-top" id="back-to-top">
+        <i class="fas fa-chevron-up"></i>
+    </a>
+
+    <!-- Templates -->
+    <template id="product-template">
+        <div class="product-card">
+            <div class="product-badge"></div>
+            <div class="product-image">
+                <img src="" alt="">
+                <div class="product-overlay">
+                    <a href="#" class="view-product"><i class="fas fa-eye"></i></a>
+                </div>
+            </div>
+            <div class="product-info">
+                <div class="product-category"></div>
+                <h3 class="product-name"></h3>
+                <div class="product-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                </div>
+                <p class="product-price"></p>
+                <p class="product-description"></p>
+                <a href="#" class="product-link" target="_blank">Beli Sekarang</a>
+            </div>
+        </div>
+    </template>
+
+    <template id="category-template">
+        <div class="category-card">
+            <div class="category-icon">
+                <i class="fas"></i>
+            </div>
+            <h3 class="category-name"></h3>
+            <a href="#" class="category-link">Lihat Produk</a>
+        </div>
+    </template>
+
+    <!-- Modal Template -->
+    <div class="product-modal" id="product-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-body">
+                <div class="modal-product-image">
+                    <img src="" alt="" id="modal-image">
+                </div>
+                <div class="modal-product-info">
+                    <h3 id="modal-name"></h3>
+                    <p id="modal-price"></p>
+                    <div class="modal-product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i>
+                        <span>(14 ulasan)</span>
+                    </div>
+                    <div class="modal-product-description">
+                        <p id="modal-description"></p>
+                    </div>
+                    <a href="#" class="modal-product-link" id="modal-link" target="_blank">Beli Sekarang</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="shop-data.js"></script>
+    <script>
+        // Live Chat Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBubble = document.getElementById('chatBubble');
+            const chatContainer = document.getElementById('chatContainer');
+            const closeChat = document.getElementById('closeChat');
+            const chatInput = document.getElementById('chatInput');
+            const sendMessage = document.getElementById('sendMessage');
+            const chatMessages = document.getElementById('chatMessages');
+            const quickReplies = document.querySelectorAll('.quick-reply');
+            const chatBadge = document.getElementById('chatBadge');
+
+            // BroadcastChannel for admin <-> client communication
+            let bc = null;
+            try { bc = new BroadcastChannel('live-chat'); } catch (e) { bc = null; }
+
+            // Fallback: if BroadcastChannel unsupported (e.g., file://), use storage event
+            if (!bc) {
+                window.addEventListener('storage', (ev) => {
+                    try {
+                                if (ev.key === 'live_chat_history_v1' && ev.newValue) {
+                                    const list = JSON.parse(ev.newValue);
+                                    const last = list[list.length - 1];
+                                    if (last) {
+                                        // Map admin sender to 'bot' for user view
+                                        const sender = (last.sender === 'admin') ? 'bot' : last.sender;
+                                        addMessage(last.text, sender);
+                                    }
+                                }
+                    } catch (err) { /* ignore parse errors */ }
+                });
+            }
+
+            let unreadMessages = 1;
+            
+            // Bot responses
+            const botResponses = {
+                "default": "Terima kasih atas pesan Anda! Tim kami akan segera merespons. Untuk bantuan cepat, Anda bisa tanyakan tentang: produk terbaru, harga, atau cara order.",
+                "ada produk apa saja?": "Kami punya berbagai produk menarik! Coba lihat di bagian 'Semua Produk' atau kategori khusus. Produk apa yang sedang Anda cari?",
+                "berapa harga termurah?": "Kami punya produk mulai dari Rp 50.000! Cek bagian produk untuk melihat harga terbaru dan promo yang sedang berlangsung.",
+                "bagaimana cara order?": "Cara order mudah: 1. Pilih produk 2. Klik 'Beli Sekarang' 3. Ikuti instruksi pembayaran. Butuh bantuan lebih lanjut?",
+                "ada diskon hari ini?": "Ya! Cek banner promo di homepage dan produk dengan badge 'DISKON'. Juga, daftar newsletter untuk dapat update promo terbaru!",
+                "halo": "Halo! 👋 Senang bisa membantu Anda hari ini. Ada yang bisa saya bantu?",
+                "hai": "Hai! 😊 Ada pertanyaan tentang produk atau layanan kami?"
+            };
+            
+            // Toggle chat
+            chatBubble.addEventListener('click', function() {
+                chatContainer.classList.toggle('active');
+                if (chatContainer.classList.contains('active')) {
+                    unreadMessages = 0;
+                    updateBadge();
+                }
+            });
+            
+            closeChat.addEventListener('click', function() {
+                chatContainer.classList.remove('active');
+            });
+            
+            // Send message
+            function sendUserMessage(message) {
+                if (!message.trim()) return;
+                
+                // Add user message
+                addMessage(message, 'user');
+                chatInput.value = '';
+                
+                // Simulate bot typing
+                setTimeout(() => {
+                    const botResponse = getBotResponse(message.toLowerCase());
+                    addMessage(botResponse, 'bot');
+                }, 1000);
+            }
+            
+            // Send button click
+            sendMessage.addEventListener('click', function() {
+                sendUserMessage(chatInput.value);
+            });
+            
+            // Enter key press
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendUserMessage(this.value);
+                }
+            });
+            
+            // Quick replies
+            quickReplies.forEach(reply => {
+                reply.addEventListener('click', function() {
+                    const message = this.getAttribute('data-message');
+                    sendUserMessage(message);
+                });
+            });
+            
+            // Render message element without side effects
+            function displayMessage(text, sender, isoTime, { store = false, broadcast = false } = {}) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+
+                const timeObj = isoTime ? new Date(isoTime) : new Date();
+                const time = timeObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+                messageDiv.innerHTML = `
+                    ${text}
+                    <div class="message-time">${time}</div>
+                `;
+
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Show notification badge if chat is closed (only for bot messages)
+                if (sender === 'bot' && !chatContainer.classList.contains('active')) {
+                    unreadMessages++;
+                    updateBadge();
+                }
+
+                // Optionally store to history (caller should store only once)
+                if (store) {
+                    try {
+                        const key = 'live_chat_history_v1';
+                        const raw = localStorage.getItem(key);
+                        const list = raw ? JSON.parse(raw) : [];
+                        list.push({ text: String(text), sender, time: timeObj.toISOString() });
+                        localStorage.setItem(key, JSON.stringify(list));
+                    } catch (e) { /* ignore storage errors */ }
+                }
+
+                // Optionally broadcast to admin
+                if (broadcast && bc) {
+                    try { bc.postMessage({ type: 'message', sender, text, time: timeObj.toISOString() }); } catch (e) {}
+                }
+            }
+
+            // Add message with default behaviour: store and notify admin
+            function addMessage(text, sender) {
+                displayMessage(text, sender, new Date().toISOString(), { store: true, broadcast: true });
+            }
+
+            // Receive admin replies (if admin sends replies via BroadcastChannel)
+                if (bc) {
+                    bc.onmessage = (ev) => {
+                        const msg = ev.data;
+                        if (!msg || !msg.type) return;
+                        if (msg.type === 'admin-reply') {
+                            // display admin reply for user view as 'bot' but do NOT re-store (already stored by admin)
+                            displayMessage(msg.text, 'bot', msg.time || new Date().toISOString(), { store: false, broadcast: false });
+                        }
+                    };
+                }
+            
+            // Get bot response
+            function getBotResponse(message) {
+                for (const [key, response] of Object.entries(botResponses)) {
+                    if (message.includes(key)) {
+                        return response;
+                    }
+                }
+                return botResponses.default;
+            }
+            
+            // Update notification badge
+            function updateBadge() {
+                if (unreadMessages > 0) {
+                    chatBadge.textContent = unreadMessages;
+                    chatBadge.style.display = 'flex';
+                } else {
+                    chatBadge.style.display = 'none';
+                }
+            }
+            
+            // Auto-open chat after 10 seconds
+            setTimeout(() => {
+                if (!chatContainer.classList.contains('active')) {
+                    unreadMessages++;
+                    updateBadge();
+                }
+            }, 10000);
+            
+            // Close chat when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!chatContainer.contains(event.target) && 
+                    !chatBubble.contains(event.target) && 
+                    chatContainer.classList.contains('active')) {
+                    chatContainer.classList.remove('active');
+                }
+            });
+            
+            // Prevent closing when clicking inside chat
+            chatContainer.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
+    </script>
+    <script src="main.js"></script>
+</body>
+</html>
